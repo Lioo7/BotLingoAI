@@ -2,7 +2,6 @@ import psycopg2
 import sys
 sys.path.append("../")
 from logs.logging import logger
-import sys
 
 from config.config import DB_CONFIG
 
