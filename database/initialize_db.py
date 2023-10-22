@@ -6,10 +6,10 @@ import sys
 
 from config.config import DB_CONFIG
 
-def create_tables():
+def create_tables(config=DB_CONFIG):
     try:
         # Connect to the database
-        conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg2.connect(**config)
         cursor = conn.cursor()
 
         # Execute the SQL schema script
