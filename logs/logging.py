@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 
 # Configure the logger to write log entries to a file in the 'logs' directory
 log_file = os.path.join('../logs', 'app.log')
