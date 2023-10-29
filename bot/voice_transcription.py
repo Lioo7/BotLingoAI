@@ -4,13 +4,13 @@ from pydub import AudioSegment
 
 def transcribe_voice_message(file_id):
     # Load the OGG file
-    ogg_audio = AudioSegment.from_file(f"apps/voice_messages/{file_id}.ogg", format="ogg")
+    ogg_audio = AudioSegment.from_file(f"bot/voice_messages/{file_id}.ogg", format="ogg")
 
     # Export it as WAV
-    ogg_audio.export(f"apps/voice_messages/{file_id}.wav", format="wav")
+    ogg_audio.export(f"bot/voice_messages/{file_id}.wav", format="wav")
 
     # transcribe audio file
-    AUDIO_FILE = f"apps/voice_messages/{file_id}.wav"
+    AUDIO_FILE = f"bot/voice_messages/{file_id}.wav"
 
     # use the audio file as the audio source
     r = sr.Recognizer()
