@@ -7,7 +7,6 @@ from telegram.ext import (
     MessageHandler,
     ContextTypes,
     filters,
-    CallbackContext,
 )
 
 from .voice_transcription import transcribe_voice_message
@@ -71,7 +70,7 @@ async def handle_audio(update: Update, context: ContextTypes):
         audio_file_id = update.message.voice.file_id
         # Use the bot's 'getFile' method to get the file path
         file = await context.bot.get_file(audio_file_id)
-        await file.download_to_drive(f'apps/voice_messages/{audio_file_id}.ogg')  # Download the audio to a file
+        await file.download_to_drive(f'bot/voice_messages/{audio_file_id}.ogg')  # Download the audio to a file
 
         transcribe_voice_message(audio_file_id)
 
