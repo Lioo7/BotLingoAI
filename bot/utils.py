@@ -8,7 +8,7 @@ from logs.logging import logger
 def convert_text_to_audio(text: str, output_file: str) -> None:
     try:
         # Specify the language code
-        language = "en-US"
+        language = "en"
 
         # Create a gTTS object with the specified language
         tts = gTTS(text, lang=language)
@@ -32,7 +32,7 @@ def convert_audio_to_text(audio_file: str) -> str:
             audio = recognizer.record(source)
 
         # Recognize the speech in the audio
-        text = recognizer.recognize_google(audio, language="en-US")
+        text = recognizer.recognize_google(audio, language="en")
         return text
     except sr.UnknownValueError:
         logger.warning("Google Speech Recognition could not understand the audio.")
