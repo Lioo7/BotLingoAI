@@ -1,17 +1,19 @@
+# from logs.logging import logger
+import os
 from typing import Final
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+
+from dotenv import load_dotenv
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
     CommandHandler,
-    MessageHandler,
     ContextTypes,
+    MessageHandler,
     filters,
 )
+
 from .utils import transcribe_voice_message
-# from logs.logging import logger
-import os
-from dotenv import load_dotenv
 
 # Specify the path to the .env file in the 'config' directory
 dotenv_path = os.path.join("config", ".env")
@@ -85,14 +87,14 @@ async def handle_audio(update: Update, context: ContextTypes):
             audio_file_id = update.message.voice.file_id
 
             # Define the directory where you want to save voice messages
-            voice_messages_dir = 'bot/voice_messages'
+            voice_messages_dir = "bot/voice_messages"
             # Check if the directory exists, and if not, create it
             if not os.path.exists(voice_messages_dir):
                 os.makedirs(voice_messages_dir)
 
             # Use the bot's 'getFile' method to get the file path
             file = await context.bot.get_file(audio_file_id)
-            file_path = os.path.join(voice_messages_dir, f'{audio_file_id}.ogg')
+            file_path = os.path.join(voice_messages_dir, f"{audio_file_id}.ogg")
 
             # Download the audio to the file
             await file.download_to_drive(file_path)

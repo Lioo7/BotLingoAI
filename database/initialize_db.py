@@ -1,9 +1,11 @@
-import psycopg2
 import sys
+
+import psycopg2
+
 sys.path.append("../")
+from config.config import DB_CONFIG
 from logs.logging import logger
 
-from config.config import DB_CONFIG
 
 def create_tables(config=DB_CONFIG):
     try:
@@ -12,18 +14,19 @@ def create_tables(config=DB_CONFIG):
         cursor = conn.cursor()
 
         # Execute the SQL schema script
-        with open('schema.sql', 'r') as schema_file:
+        with open("schema.sql", "r") as schema_file:
             schema_sql = schema_file.read()
             cursor.execute(schema_sql)
             conn.commit()
 
-        logger.info('Database schema created successfully.')
+        logger.info("Database schema created successfully.")
 
         # Close the cursor and the connection
         cursor.close()
         conn.close()
     except Exception as e:
-        logger.error(f'Error creating database schema: {str(e)}')
+        logger.error(f"Error creating database schema: {str(e)}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     create_tables()

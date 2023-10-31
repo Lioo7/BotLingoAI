@@ -1,15 +1,21 @@
-from gtts import gTTS
-import speech_recognition as sr
-from pydub import AudioSegment
 import sys
+
+import speech_recognition as sr
+from gtts import gTTS
+from pydub import AudioSegment
+
 sys.path.append("../")
-from logs.logging import logger
 from os import path
+
+from logs.logging import logger
+
 
 def transcribe_voice_message(file_id):
     try:
         # Load the OGG file
-        ogg_audio = AudioSegment.from_file(f"bot/voice_messages/{file_id}.ogg", format="ogg")
+        ogg_audio = AudioSegment.from_file(
+            f"bot/voice_messages/{file_id}.ogg", format="ogg"
+        )
 
         # Export it as WAV
         ogg_audio.export(f"bot/voice_messages/{file_id}.wav", format="wav")
@@ -27,6 +33,7 @@ def transcribe_voice_message(file_id):
     except Exception as e:
         logger.error(f"Error transcribing file {file_id}: {str(e)}")
 
+
 def convert_text_to_audio(text: str, output_file: str) -> None:
     try:
         # Specify the language code
@@ -41,6 +48,7 @@ def convert_text_to_audio(text: str, output_file: str) -> None:
         logger.info("Audio saved as %s", output_file)
     except Exception as e:
         logger.error("An error occurred while converting text to audio: %s", str(e))
+
 
 def convert_audio_to_text(audio_file: str) -> str:
     try:
@@ -60,14 +68,18 @@ def convert_audio_to_text(audio_file: str) -> str:
         logger.warning("Google Speech Recognition could not understand the audio.")
         return ""
     except sr.RequestError as e:
-        logger.error("Could not request results from Google Speech Recognition service: %s", str(e))
+        logger.error(
+            "Could not request results from Google Speech Recognition service: %s",
+            str(e),
+        )
         return ""
+
 
 def convert_mp3_to_wav(mp3_file: str, wav_file: str) -> None:
     try:
         # Load the MP3 file
         audio = AudioSegment.from_mp3(mp3_file)
-        
+
         # Export as WAV
         audio.export(wav_file, format="wav")
         logger.info("MP3 file converted to WAV: %s", wav_file)
