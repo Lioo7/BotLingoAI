@@ -68,9 +68,19 @@ async def handle_audio(update: Update, context: ContextTypes):
     # Check if the message contains audio
     if update.message.voice:
         audio_file_id = update.message.voice.file_id
+
+        # Define the directory where you want to save voice messages
+        voice_messages_dir = 'bot/voice_messages'
+        # Check if the directory exists, and if not, create it
+        if not os.path.exists(voice_messages_dir):
+            os.makedirs(voice_messages_dir)
+            
         # Use the bot's 'getFile' method to get the file path
         file = await context.bot.get_file(audio_file_id)
-        await file.download_to_drive(f'bot/voice_messages/{audio_file_id}.ogg')  # Download the audio to a file
+        file_path = os.path.join(voice_messages_dir, f'{audio_file_id}.ogg')
+
+        # Download the audio to the file
+        await file.download_to_drive(file_path)
 
         transcribe_voice_message(audio_file_id)
 
