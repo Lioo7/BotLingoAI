@@ -293,4 +293,9 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Ignore sound files
+*.mp3
+*.ogg
+*.wav
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,flask
