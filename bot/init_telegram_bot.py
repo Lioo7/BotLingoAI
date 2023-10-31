@@ -15,7 +15,11 @@ from .voice_transcription import transcribe_voice_message
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# Specify the path to the .env file in the 'config' directory
+dotenv_path = os.path.join("config", ".env")
+
+# Load environment variables from the specified path
+load_dotenv(dotenv_path)
 
 TOKEN: Final = os.getenv("TELEGRAM_BOT_TOKEN")
 BOT_USERNAME: Final = os.getenv("BOT_NAME")
