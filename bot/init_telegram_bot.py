@@ -1,4 +1,4 @@
-# from logs.logging import logger
+from logs.logging import logger
 import os
 from typing import Final
 
@@ -135,7 +135,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error in error handler: {str(e)}")
 
 
-# logger.info("Starting bot...")
+logger.info("Starting bot...")
 
 app = ApplicationBuilder().token(TOKEN).build()
 
