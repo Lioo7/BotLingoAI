@@ -1,17 +1,19 @@
-import pytest
 import psycopg2
-from database.database_utils import create_db_connection, save_user_to_db
+import pytest
+
 from config.config import TEST_DB_CONFIG
+from database.database_utils import create_db_connection, save_user_to_db
 
 # Define the database name and user from the test configuration
-TEST_DB_NAME = TEST_DB_CONFIG['dbname']
-TEST_DB_USER = TEST_DB_CONFIG['user']
+TEST_DB_NAME = TEST_DB_CONFIG["dbname"]
+TEST_DB_USER = TEST_DB_CONFIG["user"]
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_and_teardown_test_database(request):
     # Establish a connection to the default database for administrative tasks
     admin_conn = psycopg2.connect(
-        dbname='postgres', user=TEST_DB_USER, password='', host='localhost', port='5432'
+        dbname="postgres", user=TEST_DB_USER, password="", host="localhost", port="5432"
     )
 
     # Drop the test database if it exists
@@ -24,6 +26,7 @@ def setup_and_teardown_test_database(request):
     # Close the administrative connection
     admin_conn.close()
 
+
 @pytest.fixture
 def test_db_connection():
     # Establish a connection to the test database before running the tests
@@ -32,19 +35,22 @@ def test_db_connection():
     # Close the connection after the tests
     conn.close()
 
+
 def execute_schema_sql(test_db_connection):
     # Execute the schema.sql file to create the 'users' table in the test database
-    with open('database/schema.sql', 'r') as schema_file:
+    with open("database/schema.sql", "r") as schema_file:
         schema_sql = schema_file.read()
         cursor = test_db_connection.cursor()
         cursor.execute(schema_sql)
         test_db_connection.commit()
         cursor.close()
 
+
 def test_create_db_connection():
     # Test creating a database connection
     conn = create_db_connection(TEST_DB_CONFIG)
     assert conn is not None
+
 
 def test_save_user_to_db(test_db_connection):
     # Execute the schema.sql file to create the 'users' table

@@ -1,8 +1,11 @@
-import psycopg2
 import sys
+
+import psycopg2
+
 sys.path.append("../")
+from config.config import DB_CONFIG
 from logs.logging import logger
-from config.config import DB_CONFIG  
+
 
 def create_db_connection(config=DB_CONFIG):
     try:
@@ -12,10 +15,13 @@ def create_db_connection(config=DB_CONFIG):
         logger.error(f"Error creating a database connection: {str(e)}")
         return None
 
-def save_user_to_db(conn, first_name, phone_number='', email=''):
+
+def save_user_to_db(conn, first_name, phone_number="", email=""):
     try:
         cursor = conn.cursor()
-        insert_query = "INSERT INTO users (first_name, phone_number, email) VALUES (%s, %s, %s)"
+        insert_query = (
+            "INSERT INTO users (first_name, phone_number, email) VALUES (%s, %s, %s)"
+        )
         cursor.execute(insert_query, (first_name, phone_number, email))
         conn.commit()
         cursor.close()
