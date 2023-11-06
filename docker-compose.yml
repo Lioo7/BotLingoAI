@@ -1,0 +1,23 @@
+# Start Run: docker-compose up -d
+# Rebuild: docker-compose up --build -d
+
+version: "3.8"
+services:
+  db:
+    container_name: postgres_container
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: botlingoai
+    ports:
+      - "5432:5432"
+  adminer:
+    container_name: adminer_container
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
