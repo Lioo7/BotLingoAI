@@ -1,9 +1,9 @@
 # Database configuration
 
 DB_CONFIG = {
-    "dbname": "chatbot_db",
-    "user": "postgres",
-    "password": "",
+    "dbname": "botlingoai",
+    "user": "docker",
+    "password": "root",
     "host": "localhost",
     "port": "5432",
 }
