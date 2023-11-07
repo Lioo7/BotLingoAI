@@ -16,7 +16,6 @@ initial_questions = [
     "Share a fun fact in English.",
 ]
 
-
 def greet_user(user_name):
     # Randomly select an initial question
     random_question = random.choice(initial_questions)
@@ -39,17 +38,17 @@ def respond_to_user(answer, model="gpt-3.5-turbo"):
     return response
 
 
-# def main():
-#     user_name = input("Please enter your name: ")
-#     greeting = greet_user(user_name)
-#     print("Teacher:", greeting)
+def main():
+    user_name = input("Please enter your name: ")
+    greeting = greet_user(user_name)
+    print("Teacher:", greeting)
 
-#     while True:
-#         user_response = input("You: ")
-#         if user_response.lower() == "exit":
-#             break
-#         response = respond_to_user(user_response)
-#         print("Teacher:", response)
+    while True:
+        user_response = input("You: ")
+        if user_response.lower() == "exit":
+            break
+        response = respond_to_user(user_response)
+        print("Teacher:", response)
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

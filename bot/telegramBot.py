@@ -14,6 +14,7 @@ from telegram.ext import (
 )
 
 from .utils import transcribe_voice_message
+from .chat_gpt import greet_user, respond_to_user
 
 # Load environment variables from the specified path
 load_dotenv()
@@ -25,13 +26,14 @@ class TelegramBot:
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
-            keyboard = InlineKeyboardMarkup.from_button(
-                InlineKeyboardButton("Click to start", callback_data="start_lesson_button")
-            )
+            # keyboard = InlineKeyboardMarkup.from_button(
+            #     InlineKeyboardButton("Click to start", callback_data="start_lesson_button")
+            # )
 
             await update.message.reply_text(
-                f"Hello {update.effective_user.first_name}, Welcome to teacherBot which will teach you to write, read and speak in English.",
-                reply_markup=keyboard,
+                greet_user(update.effective_user.first_name),
+                # f"Hello {update.effective_user.first_name}, Welcome to teacherBot which will teach you to write, read and speak in English.",
+                # reply_markup=keyboard,
             )
 
         except Exception as e:
@@ -47,12 +49,12 @@ class TelegramBot:
 
     def handle_response(self, text: str) -> str:
         try:
-            if "love python" in text:
-                return "Remember to subscribe!"
-
-            return "I do not understand what you wrote"
+            response = respond_to_user(text)
+            return response
+        
         except Exception as e:
             logger.error(f"Error in handle_response: {str(e)}")
+            print(f"Error in handle_response: {str(e)}")
             
     async def handle_audio(self, update: Update, context: ContextTypes):
         try:
@@ -84,13 +86,13 @@ class TelegramBot:
             logger.error(f"Error in handle_audio: {str(e)}")
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        
         try:
-            # message_type: str = update.message.chat.type
             text: str = update.message.text
-
+            print(f"User [{update.effective_user.first_name}]:", text)
             response: str = self.handle_response(text)
 
-            print("Bot: ", response)
+            print("Bot:", response)
             await update.message.reply_text(response)
         except Exception as e:
             logger.error(f"Error in handle_message: {str(e)}")
