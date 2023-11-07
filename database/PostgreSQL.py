@@ -5,7 +5,6 @@ import psycopg2
 sys.path.append("../")
 from logs.logging import logger
 
-
 class PostgreSQL:
     def __init__(self, dbname, user, password, host="localhost", port=5432):
         self.database = dbname
