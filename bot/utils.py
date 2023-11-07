@@ -30,8 +30,11 @@ def transcribe_voice_message(file_id):
 
         transcription = r.recognize_google(audio)
         logger.info(f"Transcription for file {file_id}: {transcription}")
+        print(f"Bot: Transcription for file {file_id}: {transcription}")
+        return transcription
     except Exception as e:
         logger.error(f"Error transcribing file {file_id}: {str(e)}")
+        print(f"Error transcribing file {file_id}: {str(e)}")
 
 
 def convert_text_to_audio(text: str, output_file: str) -> None:
