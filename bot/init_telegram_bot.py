@@ -1,4 +1,3 @@
-from logs.logging import logger
 import os
 from typing import Final
 
@@ -13,13 +12,11 @@ from telegram.ext import (
     filters,
 )
 
+from logs.logging import logger
+
 from .utils import transcribe_voice_message
 
-# Specify the path to the .env file in the 'config' directory
-dotenv_path = os.path.join("config", ".env")
-
-# Load environment variables from the specified path
-load_dotenv(dotenv_path)
+load_dotenv()
 
 TOKEN: Final = os.getenv("TELEGRAM_BOT_TOKEN")
 BOT_USERNAME: Final = os.getenv("BOT_NAME")
