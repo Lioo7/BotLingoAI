@@ -16,6 +16,7 @@ initial_questions = [
     "Share a fun fact in English.",
 ]
 
+
 def greet_user(user_name):
     # Randomly select an initial question
     random_question = random.choice(initial_questions)
@@ -49,6 +50,7 @@ def main():
             break
         response = respond_to_user(user_response)
         print("Teacher:", response)
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ import psycopg2
 sys.path.append("../")
 from logs.logging import logger
 
+
 class PostgreSQL:
     def __init__(self, dbname, user, password, host="localhost", port=5432):
         self.database = dbname
@@ -61,23 +62,25 @@ class PostgreSQL:
         if not self.connection:
             print("Not connected to the database.")
             return
-        
+
         try:
             cursor = self.connection.cursor()
-            insert_query = (
-                "INSERT INTO users (first_name, phone_number, email) VALUES (%s, %s, %s)"
-            )
+            insert_query = "INSERT INTO users (first_name, phone_number, email) VALUES (%s, %s, %s)"
             cursor.execute(insert_query, (first_name, phone_number, email))
             self.connection.commit()
             cursor.close()
-            logger.info(f"Saving user: {first_name} | email: {email} to the database successful")
-            print(f"Saving user: {first_name} | email: {email} to the database successful")
+            logger.info(
+                f"Saving user: {first_name} | email: {email} to the database successful"
+            )
+            print(
+                f"Saving user: {first_name} | email: {email} to the database successful"
+            )
             return True
         except Exception as e:
             logger.error(f"Error saving user to the database: {str(e)}")
             print(f"Error saving user to the database: {str(e)}")
             return False
-    
+
     def execute_query(self, query):
         if not self.connection:
             print("Not connected to the database.")
@@ -91,4 +94,3 @@ class PostgreSQL:
             print("Error executing query:", error)
         finally:
             cursor.close()
-
