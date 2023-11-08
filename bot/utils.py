@@ -10,7 +10,7 @@ from os import path
 from logs.logging import logger
 
 
-def transcribe_voice_message(file_id):
+def transcribe_voice_message(file_id: str) -> str:
     try:
         # Load the OGG file
         ogg_audio = AudioSegment.from_file(

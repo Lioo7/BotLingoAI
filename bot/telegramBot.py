@@ -39,6 +39,7 @@ class TelegramBot:
             #     InlineKeyboardButton("Click to start", callback_data="start_lesson_button")
             # )
 
+            # TODO: remove the keyboard after the user will choose his preferred mode
             user = update.message.from_user
             reply_markup = ReplyKeyboardMarkup(
                 keyboard=[
