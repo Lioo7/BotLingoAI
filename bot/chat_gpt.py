@@ -16,14 +16,15 @@ initial_questions = [
     "Share a fun fact in English.",
 ]
 
-def greet_user(user_name):
+
+def greet_user(user_name: str) -> str:
     # Randomly select an initial question
     random_question = random.choice(initial_questions)
     introduction = f"Hello, {user_name}! I am your English Tutor ChatBot. I'm here to help you improve your spoken English. I will correct your mistakes and ask you questions to practice. Let's start with a question: {random_question}"
     return introduction
 
 
-def respond_to_user(answer, model="gpt-3.5-turbo"):
+def respond_to_user(answer: str, model: str = "gpt-3.5-turbo") -> str:
     response = openai.ChatCompletion.create(
         model=model,
         messages=[
@@ -49,6 +50,7 @@ def main():
             break
         response = respond_to_user(user_response)
         print("Teacher:", response)
+
 
 if __name__ == "__main__":
     main()
