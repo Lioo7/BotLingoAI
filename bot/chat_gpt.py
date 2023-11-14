@@ -42,7 +42,7 @@ def validate_user_input(user_input):
     return True
 
 
-def process_interaction(user_input, system_message, model="gpt-3.5-turbo"):
+def process_interaction(user_input:str, system_message: str, model="gpt-3.5-turbo"):
     """
     Handles the interaction between the user and the ChatGPT model.
 

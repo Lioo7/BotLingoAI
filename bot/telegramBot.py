@@ -16,12 +16,10 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
-    CallbackContext,
 )
-import asyncio
 
-from .utils import transcribe_voice_message
-from .chat_gpt import respond_to_user
+from .utils import transcribe_voice_message, convert_text_to_audio
+from .chat_gpt import process_text_interaction, process_voice_interaction
 
 # List of possible initial questions
 initial_questions = [
@@ -56,7 +54,7 @@ class TelegramBot:
             await update.message.reply_text(
                 self.greet_user(user.first_name),
                 reply_markup=reply_markup,
-                parse_mode="HTML"
+                parse_mode="HTML",
             )
 
         except Exception as e:
@@ -64,11 +62,11 @@ class TelegramBot:
 
     # Define a function to handle the user's choice
     async def handle_choice(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        print('running handle_choice')
+        print("running handle_choice")
         try:
             user_id = update.effective_user.id
             user_name = update.effective_user.first_name
-            print(f'user_name: {user_name}')
+            print(f"user_name: {user_name}")
 
             # Check if the user has already made a choice
             if user_id in self.user_choices:
@@ -80,29 +78,22 @@ class TelegramBot:
 
             user_choice = update.callback_query.data
             self.user_choices[user_id] = user_choice  # Store the user's choice
-            print(f'user_choice: {user_choice}')
+            print(f"user_choice: {user_choice}")
 
             if user_choice == "text" or user_choice == "voice":
-                await update.callback_query.message.reply_text(f"Great! You chose {user_choice} messages.")
+                await update.callback_query.message.reply_text(
+                    f"Great! You chose {user_choice} messages."
+                )
                 first_question = await self.ask_first_question(user_name)
-                print(f'first_question: {first_question}')
+                print(f"first_question: {first_question}")
                 await update.callback_query.message.reply_text(first_question)
 
         except Exception as e:
             logger.error(f"Error in handle_choice: {str(e)}")
 
-    # Define a callback query handler for the button
-    async def lesson_button_callback(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ):
-        try:
-            await update.callback_query.message.reply_text("How are you? ")
-        except Exception as e:
-            logger.error(f"Error in lesson_button_callback: {str(e)}")
-
     def handle_text_response(self, text: str) -> str:
         try:
-            response = respond_to_user(text)
+            response = process_text_interaction(text)
             return response
 
         except Exception as e:
@@ -111,8 +102,8 @@ class TelegramBot:
 
     def handle_voice_response(self, text: str) -> str:
         try:
-            # TODO: have to implement
-            pass
+            response = process_voice_interaction(text)
+            return response
 
         except Exception as e:
             logger.error(f"Error in handle_voice_response: {str(e)}")
@@ -141,14 +132,17 @@ class TelegramBot:
 
                 response: str = self.handle_voice_response(transcription)
 
+                convert_text_to_audio(response, "bot_response.mp3")
+
                 print("Bot: ", response)
-                await update.message.reply_text(response)
+                await update.message.reply_audio("bot/text_to_voice/bot_response.mp3")
+                # await update.message.reply_text(response)
 
         except Exception as e:
             logger.error(f"Error in handle_audio: {str(e)}")
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        print('handle_message')
+        print("handle_message")
         try:
             text: str = update.message.text
             user_id = update.effective_user.id
@@ -177,14 +171,16 @@ class TelegramBot:
             logger.error(f"Error in handle_message: {str(e)}")
 
     def greet_user(self, user_name: str) -> str:
-        return f"<b>Hi {user_name}!</b>\n"\
-            "I am your English Tutor ChatBot.\n"\
-            "I'm here to help you improve your spoken English.\n"\
-            "I will correct your mistakes and ask you questions to practice.\n\n"\
+        return (
+            f"<b>Hi {user_name}!</b>\n"
+            "I am your English Tutor ChatBot.\n"
+            "I'm here to help you improve your spoken English.\n"
+            "I will correct your mistakes and ask you questions to practice.\n\n"
             "<i>How would you like to communicate with me?</i>"
+        )
 
     async def ask_first_question(self, user_name: str) -> str:
-        print('ask_first_question is running')
+        print("ask_first_question is running")
         # Randomly select an initial question
         random_question = random.choice(initial_questions)
         introduction = f"Let's start with a question: {random_question}"
@@ -207,15 +203,15 @@ class TelegramBot:
         app.add_handler(CallbackQueryHandler(self.handle_choice, pattern="voice"))
 
         # # Messages
-        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+        app.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+        )
         app.add_handler(MessageHandler(filters.VOICE, self.handle_audio))
         # Register the callback query handler
         app.add_handler(
-            CallbackQueryHandler(
-                self.ask_first_question, pattern="ask_first_question"
-            )
+            CallbackQueryHandler(self.ask_first_question, pattern="ask_first_question")
         )
-     
+
         # Errors
         app.add_error_handler(self.error)
 
