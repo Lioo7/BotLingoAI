@@ -1,14 +1,13 @@
 from logs.logging import logger
 import os
 from typing import Final
+import random
 
 from dotenv import load_dotenv
 from telegram import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Update,
-    ReplyKeyboardMarkup,
-    KeyboardButton,
 )
 from telegram.ext import (
     ApplicationBuilder,
@@ -19,9 +18,18 @@ from telegram.ext import (
     filters,
     CallbackContext,
 )
+import asyncio
 
 from .utils import transcribe_voice_message
-from .chat_gpt import greet_user, respond_to_user
+from .chat_gpt import respond_to_user
+
+# List of possible initial questions
+initial_questions = [
+    "What's your favorite English word?",
+    "Tell me about your day in English.",
+    "Can you describe your favorite place using English?",
+    "Share a fun fact in English.",
+]
 
 # Load environment variables from the specified path
 load_dotenv()
@@ -31,32 +39,24 @@ class TelegramBot:
     def __init__(self):
         self.TOKEN: Final = os.getenv("TELEGRAM_BOT_TOKEN")
         self.BOT_USERNAME: Final = os.getenv("BOT_NAME")
-        self.user_choice = None  # Initialize user_choice as None
+        # Dictionary to store user choices
+        self.user_choices = {}
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
-            # keyboard = InlineKeyboardMarkup.from_button(
-            #     InlineKeyboardButton("Click to start", callback_data="start_lesson_button")
-            # )
+            # Create a list of button rows
+            keyboard = [
+                [InlineKeyboardButton("Text", callback_data="text")],
+                [InlineKeyboardButton("Voice", callback_data="voice")],
+            ]
 
-            # TODO: remove the keyboard after the user will choose his preferred mode
             user = update.message.from_user
-            reply_markup = ReplyKeyboardMarkup(
-                keyboard=[
-                    [KeyboardButton("Text"), KeyboardButton("Voice")],
-                ],
-                resize_keyboard=True,
-                one_time_keyboard=True,
-            )
-            await update.message.reply_text(
-                f"Hi {user.first_name}! How would you like to communicate with me?",
-                reply_markup=reply_markup,
-            )
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
             await update.message.reply_text(
-                greet_user(update.effective_user.first_name),
-                # f"Hello {update.effective_user.first_name}, Welcome to teacherBot which will teach you to write, read and speak in English.",
-                # reply_markup=keyboard,
+                self.greet_user(user.first_name),
+                reply_markup=reply_markup,
+                parse_mode="HTML"
             )
 
         except Exception as e:
@@ -64,22 +64,32 @@ class TelegramBot:
 
     # Define a function to handle the user's choice
     async def handle_choice(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        print('running handle_choice')
         try:
-            user_choice = update.message.text
-            self.user_choice = (
-                user_choice  # Store the user's choice in the class variable
-            )
+            user_id = update.effective_user.id
+            user_name = update.effective_user.first_name
+            print(f'user_name: {user_name}')
 
-            if user_choice == "Text":
-                await update.message.reply_text("Great! You chose text messages.")
-            elif user_choice == "Voice":
-                await update.message.reply_text("Excellent! You chose voice messages.")
-            else:
-                await update.message.reply_text(
-                    "I'm not sure what you mean. Please choose 'Text' or 'Voice' from the provided options."
+            # Check if the user has already made a choice
+            if user_id in self.user_choices:
+                user_choice = self.user_choices[user_id]
+                await update.callback_query.message.reply_text(
+                    f"You have already chosen: {user_choice}. Please start a new conversation to choose again."
                 )
+                return  # Exit the method
+
+            user_choice = update.callback_query.data
+            self.user_choices[user_id] = user_choice  # Store the user's choice
+            print(f'user_choice: {user_choice}')
+
+            if user_choice == "text" or user_choice == "voice":
+                await update.callback_query.message.reply_text(f"Great! You chose {user_choice} messages.")
+                first_question = await self.ask_first_question(user_name)
+                print(f'first_question: {first_question}')
+                await update.callback_query.message.reply_text(first_question)
+
         except Exception as e:
-            logger.error(f"Error in handle_message: {str(e)}")
+            logger.error(f"Error in handle_choice: {str(e)}")
 
     # Define a callback query handler for the button
     async def lesson_button_callback(
@@ -90,14 +100,23 @@ class TelegramBot:
         except Exception as e:
             logger.error(f"Error in lesson_button_callback: {str(e)}")
 
-    def handle_response(self, text: str) -> str:
+    def handle_text_response(self, text: str) -> str:
         try:
             response = respond_to_user(text)
             return response
 
         except Exception as e:
-            logger.error(f"Error in handle_response: {str(e)}")
-            print(f"Error in handle_response: {str(e)}")
+            logger.error(f"Error in handle_text_response: {str(e)}")
+            print(f"Error in handle_text_response: {str(e)}")
+
+    def handle_voice_response(self, text: str) -> str:
+        try:
+            # TODO: have to implement
+            pass
+
+        except Exception as e:
+            logger.error(f"Error in handle_voice_response: {str(e)}")
+            print(f"Error in handle_voice_response: {str(e)}")
 
     async def handle_audio(self, update: Update, context: ContextTypes):
         try:
@@ -120,7 +139,7 @@ class TelegramBot:
 
                 transcription = transcribe_voice_message(audio_file_id)
 
-                response: str = self.handle_response(transcription)
+                response: str = self.handle_voice_response(transcription)
 
                 print("Bot: ", response)
                 await update.message.reply_text(response)
@@ -129,18 +148,24 @@ class TelegramBot:
             logger.error(f"Error in handle_audio: {str(e)}")
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        print('handle_message')
         try:
             text: str = update.message.text
+            user_id = update.effective_user.id
             user_name = update.effective_user.first_name
             logger.info(f"User [{user_name}]: {text}")
             print(f"User [{user_name}]:", text)
-            if self.user_choice == "Text":
+
+            # Retrieve user choice from the dictionary
+            user_choice = self.user_choices.get(user_id)
+
+            if user_choice == "text":
                 logger.info("Text Mode")
-                response: str = self.handle_response(text)
-            elif self.user_choice == "Voice":
+                response: str = self.handle_text_response(text)
+            elif user_choice == "voice":
                 logger.info("Voice Mode")
-                # TODO: have to replace the handle_response function with a new function that will handle the voice mode
-                response: str = self.handle_response(text)
+                # TODO: have to replace the handle_text_response function with handle_voice_response that will handle the voice mode
+                response: str = self.handle_text_response(text)
             else:
                 logger.warning("User has not made a choice yet")
                 # Handle the case when the user hasn't made a choice yet
@@ -150,6 +175,20 @@ class TelegramBot:
             await update.message.reply_text(response)
         except Exception as e:
             logger.error(f"Error in handle_message: {str(e)}")
+
+    def greet_user(self, user_name: str) -> str:
+        return f"<b>Hi {user_name}!</b>\n"\
+            "I am your English Tutor ChatBot.\n"\
+            "I'm here to help you improve your spoken English.\n"\
+            "I will correct your mistakes and ask you questions to practice.\n\n"\
+            "<i>How would you like to communicate with me?</i>"
+
+    async def ask_first_question(self, user_name: str) -> str:
+        print('ask_first_question is running')
+        # Randomly select an initial question
+        random_question = random.choice(initial_questions)
+        introduction = f"Let's start with a question: {random_question}"
+        return introduction
 
     async def error(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
@@ -164,23 +203,19 @@ class TelegramBot:
 
         # Commands
         app.add_handler(CommandHandler("start", self.start_command))
-
-        app.add_handler(
-            MessageHandler(
-                filters.TEXT & filters.Regex(r"(Text|Voice)"), self.handle_choice
-            )
-        )
+        app.add_handler(CallbackQueryHandler(self.handle_choice, pattern="text"))
+        app.add_handler(CallbackQueryHandler(self.handle_choice, pattern="voice"))
 
         # # Messages
-        app.add_handler(MessageHandler(filters.TEXT, self.handle_message))
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
         app.add_handler(MessageHandler(filters.VOICE, self.handle_audio))
         # Register the callback query handler
         app.add_handler(
             CallbackQueryHandler(
-                self.lesson_button_callback, pattern="start_lesson_button"
+                self.ask_first_question, pattern="ask_first_question"
             )
         )
-
+     
         # Errors
         app.add_error_handler(self.error)
 
