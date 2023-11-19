@@ -1,14 +1,9 @@
-from logs.logging import logger
 import os
-from typing import Final
 import random
+from typing import Final
 
 from dotenv import load_dotenv
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Update,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
@@ -18,8 +13,10 @@ from telegram.ext import (
     filters,
 )
 
-from .utils import transcribe_voice_message, convert_text_to_audio
+from logs.logging import logger
+
 from .chat_gpt import process_text_interaction, process_voice_interaction
+from .utils import convert_text_to_audio, transcribe_voice_message
 
 # List of possible initial questions
 initial_questions = [
@@ -40,7 +37,9 @@ class TelegramBot:
         # Dictionary to store user choices
         self.user_choices = {}
 
-    async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def start_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
         try:
             # Create a list of button rows
             keyboard = [
@@ -61,7 +60,9 @@ class TelegramBot:
             logger.error(f"Error in start_command: {str(e)}")
 
     # Define a function to handle the user's choice
-    async def handle_choice(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def handle_choice(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
         print("running handle_choice")
         try:
             user_id = update.effective_user.id
@@ -72,7 +73,8 @@ class TelegramBot:
             if user_id in self.user_choices:
                 user_choice = self.user_choices[user_id]
                 await update.callback_query.message.reply_text(
-                    f"You have already chosen: {user_choice}. Please start a new conversation to choose again."
+                    f"You have already chosen: {user_choice}. "
+                    f"Please start a new conversation to choose again."
                 )
                 return  # Exit the method
 
@@ -123,7 +125,9 @@ class TelegramBot:
 
                 # Use the bot's 'getFile' method to get the file path
                 file = await context.bot.get_file(audio_file_id)
-                file_path = os.path.join(voice_messages_dir, f"{audio_file_id}.ogg")
+                file_path = os.path.join(
+                    voice_messages_dir, f"{audio_file_id}.ogg"
+                )
 
                 # Download the audio to the file
                 await file.download_to_drive(file_path)
@@ -135,13 +139,17 @@ class TelegramBot:
                 convert_text_to_audio(response, "bot_response.mp3")
 
                 print("Bot: ", response)
-                await update.message.reply_audio("bot/text_to_voice/bot_response.mp3")
+                await update.message.reply_audio(
+                    "bot/text_to_voice/bot_response.mp3"
+                )
                 # await update.message.reply_text(response)
 
         except Exception as e:
             logger.error(f"Error in handle_audio: {str(e)}")
 
-    async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def handle_message(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ):
         print("handle_message")
         try:
             text: str = update.message.text
@@ -158,7 +166,8 @@ class TelegramBot:
                 response: str = self.handle_text_response(text)
             elif user_choice == "voice":
                 logger.info("Voice Mode")
-                # TODO: have to replace the handle_text_response function with handle_voice_response that will handle the voice mode
+                # TODO: have to replace the handle_text_response function with
+                # handle_voice_response that will handle the voice mode
                 response: str = self.handle_text_response(text)
             else:
                 logger.warning("User has not made a choice yet")
@@ -175,7 +184,7 @@ class TelegramBot:
             f"<b>Hi {user_name}!</b>\n"
             "I am your English Tutor ChatBot.\n"
             "I'm here to help you improve your spoken English.\n"
-            "I will correct your mistakes and ask you questions to practice.\n\n"
+            "I will correct your mistakes and ask you questions to practice.\n"
             "<i>How would you like to communicate with me?</i>"
         )
 
@@ -199,17 +208,25 @@ class TelegramBot:
 
         # Commands
         app.add_handler(CommandHandler("start", self.start_command))
-        app.add_handler(CallbackQueryHandler(self.handle_choice, pattern="text"))
-        app.add_handler(CallbackQueryHandler(self.handle_choice, pattern="voice"))
+        app.add_handler(
+            CallbackQueryHandler(self.handle_choice, pattern="text")
+        )
+        app.add_handler(
+            CallbackQueryHandler(self.handle_choice, pattern="voice")
+        )
 
         # # Messages
         app.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message)
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, self.handle_message
+            )
         )
         app.add_handler(MessageHandler(filters.VOICE, self.handle_audio))
         # Register the callback query handler
         app.add_handler(
-            CallbackQueryHandler(self.ask_first_question, pattern="ask_first_question")
+            CallbackQueryHandler(
+                self.ask_first_question, pattern="ask_first_question"
+            )
         )
 
         # Errors

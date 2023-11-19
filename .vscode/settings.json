@@ -1,0 +1,26 @@
+{
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.defaultInterpreterPath": "${config:python.pythonPath}",
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.formatting.provider": "none",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    // "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    }
+  },
+  "isort.args": ["--profile", "black"],
+  "mypy.enabled": true,
+  "mypy.configFile": "mypy.ini",
+  "mypy.dmypyExecutable": "${workspaceFolder}",
+  "mypy.runUsingActiveInterpreter": true,
+}
