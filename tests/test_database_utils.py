@@ -13,7 +13,11 @@ TEST_DB_USER = TEST_DB_CONFIG["user"]
 def setup_and_teardown_test_database(request):
     # Establish a connection to the default database for administrative tasks
     admin_conn = psycopg2.connect(
-        dbname="postgres", user=TEST_DB_USER, password="", host="localhost", port="5432"
+        dbname="postgres",
+        user=TEST_DB_USER,
+        password="",
+        host="localhost",
+        port="5432",
     )
 
     # Drop the test database if it exists
@@ -61,7 +65,9 @@ def test_save_user_to_db(test_db_connection):
     phone_number = "123-456-7890"
     email = "john@example.com"
 
-    result = save_user_to_db(test_db_connection, first_name, phone_number, email)
+    result = save_user_to_db(
+        test_db_connection, first_name, phone_number, email
+    )
     assert result is True
 
     # Verify that the data was saved by retrieving it from the database

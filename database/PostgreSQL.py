@@ -1,8 +1,8 @@
-import sys
+# import sys
 
 import psycopg2
 
-sys.path.append("../")
+# sys.path.append("../")
 from logs.logging import logger
 
 
