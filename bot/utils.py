@@ -1,11 +1,11 @@
-import sys
+# import sys
 
 import speech_recognition as sr
 from gtts import gTTS
 from pydub import AudioSegment
 
-sys.path.append("../")
-from os import path
+# sys.path.append("../")
+# from os import path
 
 from logs.logging import logger
 
@@ -35,9 +35,10 @@ def transcribe_voice_message(file_id: str) -> str:
     except Exception as e:
         logger.error(f"Error transcribing file {file_id}: {str(e)}")
         print(f"Error transcribing file {file_id}: {str(e)}")
+        raise
 
 
-def convert_text_to_audio(text: str, output_file: str) -> None:
+def convert_text_to_audio(text: str, output_name: str) -> None:
     try:
         # Specify the language code
         language = "en"
@@ -46,11 +47,13 @@ def convert_text_to_audio(text: str, output_file: str) -> None:
         tts = gTTS(text, lang=language)
 
         # Save the audio to the specified file
-        tts.save(output_file)
+        tts.save(f"bot/text_to_voice/{output_name}")
 
-        logger.info("Audio saved as %s", output_file)
+        logger.info("Audio saved as %s", output_name)
     except Exception as e:
-        logger.error("An error occurred while converting text to audio: %s", str(e))
+        logger.error(
+            "An error occurred while converting text to audio: %s", str(e)
+        )
 
 
 def convert_audio_to_text(audio_file: str) -> str:
@@ -68,7 +71,9 @@ def convert_audio_to_text(audio_file: str) -> str:
         text = recognizer.recognize_google(audio, language="en")
         return text
     except sr.UnknownValueError:
-        logger.warning("Google Speech Recognition could not understand the audio.")
+        logger.warning(
+            "Google Speech Recognition could not understand the audio."
+        )
         return ""
     except sr.RequestError as e:
         logger.error(
@@ -87,4 +92,25 @@ def convert_mp3_to_wav(mp3_file: str, wav_file: str) -> None:
         audio.export(wav_file, format="wav")
         logger.info("MP3 file converted to WAV: %s", wav_file)
     except Exception as e:
-        logger.error("An error occurred while converting MP3 to WAV: %s", str(e))
+        logger.error(
+            "An error occurred while converting MP3 to WAV: %s", str(e)
+        )
+
+
+# if __name__ == "__main__":
+#     text_to_convert = "Hey, my name is Lior Atiya and I'm your English tutor"
+#     mp3_output_name = "output.mp3"
+#     wav_output_file = "output.wav"
+
+#     # Convert text to audio
+#     convert_text_to_audio(text_to_convert, mp3_output_name)
+
+#     # # Convert MP3 to WAV
+#     # convert_mp3_to_wav(mp3_output_file, wav_output_file)
+
+#     # # Extract text from the WAV file
+#     # result = convert_audio_to_text(wav_output_file)
+
+#     # if result:
+#     #     print("Converted Text:")
+#     #     print(result)
