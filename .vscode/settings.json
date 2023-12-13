@@ -20,7 +20,7 @@
   },
   "isort.args": ["--profile", "black"],
   "mypy.enabled": true,
-  "mypy.configFile": "mypy.ini",
+  "mypy.configFile": "pyproject.toml",
   "mypy.dmypyExecutable": "${workspaceFolder}",
   "mypy.runUsingActiveInterpreter": true,
 }

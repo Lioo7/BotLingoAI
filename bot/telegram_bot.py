@@ -1,6 +1,6 @@
+import asyncio
 import os
 import random
-import asyncio
 from typing import Final
 
 from dotenv import load_dotenv
@@ -35,23 +35,21 @@ class TelegramBot:
     def __init__(self):
         self.TOKEN: Final = os.getenv("TELEGRAM_BOT_TOKEN")
         self.BOT_USERNAME: Final = os.getenv("BOT_NAME")
-        # Dictionary to store user choices
-        self.user_choices = {}
 
     async def start_command(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ):
+    ) -> None:
         try:
-            user = update.message.from_user
-
-            await update.message.reply_text(self.greet_user(user.first_name), parse_mode="HTML")
-
-            first_question = await self.ask_first_question(user.first_name)
-            print(f"first_question: {first_question}")
-            # One-second delay
-            await asyncio.sleep(2)
-            await update.message.reply_text(first_question)
-
+            if update.message:
+                user = update.message.from_user
+                if user:
+                    await update.message.reply_text(
+                        self.greet_user(user.first_name), parse_mode="HTML"
+                    )
+                    first_question = await self.ask_first_question(user.first_name)
+                    print(f"first_question: {first_question}")
+                    await asyncio.sleep(2)  # One-unit = one second of delay
+                    await update.message.reply_text(first_question)
         except Exception as e:
             logger.error(f"Error in start_command: {str(e)}")
 
@@ -62,7 +60,7 @@ class TelegramBot:
 
         except Exception as e:
             logger.error(f"Error in handle_text_response: {str(e)}")
-            print(f"Error in handle_text_response: {str(e)}")
+            return "An error occurred"
 
     def handle_voice_response(self, text: str) -> str:
         try:
@@ -71,12 +69,12 @@ class TelegramBot:
 
         except Exception as e:
             logger.error(f"Error in handle_voice_response: {str(e)}")
-            print(f"Error in handle_voice_response: {str(e)}")
+            return "An error occurred"
 
     async def handle_audio(self, update: Update, context: ContextTypes):
         try:
-            # Check if the message contains audio
-            if update.message.voice:
+            # Check if the message exists and contains audio
+            if update.message and update.message.voice:
                 audio_file_id = update.message.voice.file_id
 
                 # Define the directory where you want to save voice messages
@@ -104,27 +102,26 @@ class TelegramBot:
                 await update.message.reply_audio(
                     "bot/text_to_voice/bot_response.mp3"
                 )
-                # await update.message.reply_text(response)
+                await update.message.reply_text(response)
 
         except Exception as e:
             logger.error(f"Error in handle_audio: {str(e)}")
 
     async def handle_message(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ):
+    ) -> None:
         print("handle_message")
         try:
-            text: str = update.message.text
-            user_id = update.effective_user.id
-            user_name = update.effective_user.first_name
-            logger.info(f"User [{user_name}]: {text}")
-            print(f"User [{user_name}]:", text)
-
-            # Retrieve user choice from the dictionary
-            response: str = self.handle_text_response(text)
-
-            print("Bot:", response)
-            await update.message.reply_text(response)
+            if update.message:
+                text: str = update.message.text or ""  # Use empty string if text is None
+                if update.effective_user:
+                    # user_id = update.effective_user.id
+                    user_name = update.effective_user.first_name
+                    logger.info(f"User [{user_name}]: {text}")
+                    print(f"User [{user_name}]:", text)
+                    response: str = self.handle_text_response(text)
+                    print("Bot:", response)
+                    await update.message.reply_text(response)
         except Exception as e:
             logger.error(f"Error in handle_message: {str(e)}")
 
@@ -156,14 +153,8 @@ class TelegramBot:
 
         # Commands
         app.add_handler(CommandHandler("start", self.start_command))
-        # app.add_handler(
-        #     CallbackQueryHandler(self.handle_choice, pattern="text")
-        # )
-        # app.add_handler(
-        #     CallbackQueryHandler(self.handle_choice, pattern="voice")
-        # )
 
-        # # Messages
+        # Messages
         app.add_handler(
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND, self.handle_message
