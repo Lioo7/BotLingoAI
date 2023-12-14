@@ -1,5 +1,6 @@
 import asyncio
 import os
+import shutil
 import random
 from typing import Final
 
@@ -102,6 +103,10 @@ class TelegramBot:
                 await update.message.reply_audio(
                     "bot/voice_messages/bot_response.mp3"
                 )
+
+                # Remove all files from the 'voice_messages' directory
+                shutil.rmtree(voice_messages_dir)
+                logger.info("Cleared 'voice_messages' directory")
 
         except Exception as e:
             logger.error(f"Error in handle_audio: {str(e)}")
