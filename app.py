@@ -1,4 +1,4 @@
-from bot.telegramBot import TelegramBot  # run telegram bot server
+from bot.telegram_bot import TelegramBot  # run telegram bot server
 
 # from config.config import DB_CONFIG
 # from database.PostgreSQL import PostgreSQL
