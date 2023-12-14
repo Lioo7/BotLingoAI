@@ -100,9 +100,8 @@ class TelegramBot:
 
                 print("Bot: ", response)
                 await update.message.reply_audio(
-                    "bot/text_to_voice/bot_response.mp3"
+                    "bot/voice_messages/bot_response.mp3"
                 )
-                await update.message.reply_text(response)
 
         except Exception as e:
             logger.error(f"Error in handle_audio: {str(e)}")

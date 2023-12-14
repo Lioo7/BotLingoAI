@@ -47,7 +47,7 @@ def convert_text_to_audio(text: str, output_name: str) -> None:
         tts = gTTS(text, lang=language)
 
         # Save the audio to the specified file
-        tts.save(f"bot/text_to_voice/{output_name}")
+        tts.save(f"bot/voice_messages/{output_name}")
 
         logger.info("Audio saved as %s", output_name)
     except Exception as e:
