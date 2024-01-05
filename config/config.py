@@ -1,5 +1,3 @@
-# Database configuration
-
 DB_CONFIG = {
     "dbname": "botlingoai",
     "user": "docker",

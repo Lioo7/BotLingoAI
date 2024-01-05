@@ -1,13 +1,28 @@
-# import sys
+import os
 
+import boto3
 import speech_recognition as sr
+from dotenv import load_dotenv
 from gtts import gTTS
 from pydub import AudioSegment
 
-# sys.path.append("../")
-# from os import path
-
 from logs.logging import logger
+
+load_dotenv()
+
+# Check for required environment variables
+if (
+    "AWS_ACCESS_KEY_ID" not in os.environ
+    or "AWS_SECRET_ACCESS_KEY" not in os.environ
+):
+    raise ValueError(
+        "Missing AWS environment variables. Please set AWS_ACCESS_KEY_ID\
+            and AWS_SECRET_ACCESS_KEY."
+    )
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+REGION_NAME = "us-east-1"  # Change this to your desired AWS region
 
 
 def transcribe_voice_message(file_id: str) -> str:
@@ -38,7 +53,19 @@ def transcribe_voice_message(file_id: str) -> str:
         raise
 
 
-def convert_text_to_audio(text: str, output_name: str) -> None:
+def convert_text_to_audio(text: str, output_name: str, provider: str = "aws"):
+    try:
+        if provider == "google":
+            convert_text_to_audio_google(text, output_name)
+        elif provider == "aws":
+            convert_text_to_audio_aws(text, output_name)
+        else:
+            raise Exception("Invalid provider specified")
+    except Exception as e:
+        logger.error(f"Error in convert_text_to_audio: {str(e)}")
+
+
+def convert_text_to_audio_google(text: str, output_name: str) -> None:
     try:
         # Specify the language code
         language = "en"
@@ -48,6 +75,39 @@ def convert_text_to_audio(text: str, output_name: str) -> None:
 
         # Save the audio to the specified file
         tts.save(f"bot/voice_messages/{output_name}")
+
+        logger.info("Audio saved as %s", output_name)
+    except Exception as e:
+        logger.error(
+            "An error occurred while converting text to audio: %s", str(e)
+        )
+
+
+def convert_text_to_audio_aws(text: str, output_name: str) -> None:
+    try:
+        # Create a Polly client
+        polly = boto3.client(
+            "polly",
+            region_name=REGION_NAME,
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        )
+
+        # Specify the voice you want to use
+        # https://docs.aws.amazon.com/polly/latest/dg/ntts-voices-main.html
+        voice_id = "Ruth"
+
+        # Synthesize speech
+        response = polly.synthesize_speech(
+            Text=text,
+            OutputFormat="mp3",
+            VoiceId=voice_id,
+            Engine="neural",  # Specify the engine as 'neural' for NTTS
+        )
+
+        # Save the audio stream to a file
+        with open(f"bot/voice_messages/{output_name}", "wb") as file:
+            file.write(response["AudioStream"].read())
 
         logger.info("Audio saved as %s", output_name)
     except Exception as e:
@@ -95,22 +155,3 @@ def convert_mp3_to_wav(mp3_file: str, wav_file: str) -> None:
         logger.error(
             "An error occurred while converting MP3 to WAV: %s", str(e)
         )
-
-
-# if __name__ == "__main__":
-#     text_to_convert = "Hey, my name is Lior Atiya and I'm your English tutor"
-#     mp3_output_name = "output.mp3"
-#     wav_output_file = "output.wav"
-
-#     # Convert text to audio
-#     convert_text_to_audio(text_to_convert, mp3_output_name)
-
-#     # # Convert MP3 to WAV
-#     # convert_mp3_to_wav(mp3_output_file, wav_output_file)
-
-#     # # Extract text from the WAV file
-#     # result = convert_audio_to_text(wav_output_file)
-
-#     # if result:
-#     #     print("Converted Text:")
-#     #     print(result)

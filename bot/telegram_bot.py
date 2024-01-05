@@ -1,19 +1,14 @@
 import asyncio
 import os
-import shutil
 import random
+import shutil
 from typing import Final
 
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CallbackQueryHandler,
-    CommandHandler,
-    ContextTypes,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
+                          CommandHandler, ContextTypes, MessageHandler,
+                          filters)
 
 from logs.logging import logger
 
@@ -47,7 +42,9 @@ class TelegramBot:
                     await update.message.reply_text(
                         self.greet_user(user.first_name), parse_mode="HTML"
                     )
-                    first_question = await self.ask_first_question(user.first_name)
+                    first_question = await self.ask_first_question(
+                        user.first_name
+                    )
                     print(f"first_question: {first_question}")
                     await asyncio.sleep(2)  # One-unit = one second of delay
                     await update.message.reply_text(first_question)
@@ -117,7 +114,9 @@ class TelegramBot:
         print("handle_message")
         try:
             if update.message:
-                text: str = update.message.text or ""  # Use empty string if text is None
+                text: str = (
+                    update.message.text or ""
+                )  # Use empty string if text is None
                 if update.effective_user:
                     # user_id = update.effective_user.id
                     user_name = update.effective_user.first_name
