@@ -130,10 +130,10 @@ class TelegramBot:
 
     def greet_user(self, user_name: str) -> str:
         return (
-            f"<b>Hi {user_name}!</b>\n"
-            "I am your English Tutor ChatBot.\n"
-            "I'm here to help you improve your spoken English.\n"
-            "I will correct your mistakes and ask you questions to practice.\n"
+            f"<b>Welcome to BotLingo, {user_name}!</b>\n"
+            f"👋 Hey {user_name}! Ready to make English learning fun?\n"
+            "🎉 I'll guide you through exercises, correct mistakes, and we'll learn together. Any questions? I'm here!\n"
+            "💬 Let's start this language journey together!\n"
         )
 
     async def ask_first_question(self, user_name: str) -> str:
