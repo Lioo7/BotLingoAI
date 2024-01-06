@@ -2,6 +2,7 @@ import os
 
 import boto3
 import speech_recognition as sr
+from typing import List, Union
 from dotenv import load_dotenv
 from gtts import gTTS
 from pydub import AudioSegment
@@ -155,3 +156,17 @@ def convert_mp3_to_wav(mp3_file: str, wav_file: str) -> None:
         logger.error(
             "An error occurred while converting MP3 to WAV: %s", str(e)
         )
+
+
+def split_review_and_followup(input_string: str) -> List[Union[str, None]]:
+    start_index = input_string.find('*')
+    end_index = input_string.rfind('*')
+
+    if start_index != -1 and end_index != -1 and start_index < end_index:
+        review_text = input_string[:start_index].strip()
+        followup_question = input_string[start_index + 1:end_index].strip()
+
+        return [review_text, followup_question]
+    else:
+        # Return the entire string if no asterisks or they are not properly placed.
+        return [input_string, None]

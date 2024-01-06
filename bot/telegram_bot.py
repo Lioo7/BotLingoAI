@@ -13,7 +13,7 @@ from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
 from logs.logging import logger
 
 from .chat_gpt import process_text_interaction, process_voice_interaction
-from .utils import convert_text_to_audio, transcribe_voice_message
+from .utils import convert_text_to_audio, transcribe_voice_message, split_review_and_followup
 
 # List of possible initial questions
 initial_questions = [
@@ -93,12 +93,18 @@ class TelegramBot:
                 transcription = transcribe_voice_message(audio_file_id)
 
                 response: str = self.handle_voice_response(transcription)
+                review, followup = split_review_and_followup(response)
 
-                convert_text_to_audio(response, "bot_response.mp3")
+                convert_text_to_audio(review, "bot_review.mp3")
+                convert_text_to_audio(followup, "bot_followup.mp3")
 
-                print("Bot: ", response)
+                print("Bot Review: ", review)
                 await update.message.reply_audio(
-                    "bot/voice_messages/bot_response.mp3"
+                    "bot/voice_messages/bot_review.mp3"
+                )
+                print("Bot Followup: ", followup)
+                await update.message.reply_audio(
+                    "bot/voice_messages/bot_followup.mp3"
                 )
 
                 # Remove all files from the 'voice_messages' directory
@@ -123,14 +129,17 @@ class TelegramBot:
                     logger.info(f"User [{user_name}]: {text}")
                     print(f"User [{user_name}]:", text)
                     response: str = self.handle_text_response(text)
-                    print("Bot:", response)
-                    await update.message.reply_text(response)
+                    review, followup = split_review_and_followup(response)
+                    print("Bot Review:", review)
+                    await update.message.reply_text(review)
+                    print("Bot Followup:", followup)
+                    await update.message.reply_text(followup)
         except Exception as e:
             logger.error(f"Error in handle_message: {str(e)}")
 
     def greet_user(self, user_name: str) -> str:
         return (
-            f"<b>Welcome to BotLingo, {user_name}!</b>\n"
+            f"<b>Welcome to BotLingo, {user_name}!</b>\n\n"
             f"👋 Hey {user_name}! Ready to make English learning fun?\n"
             "🎉 I'll guide you through exercises, correct mistakes, and we'll learn together. Any questions? I'm here!\n"
             "💬 Let's start this language journey together!\n"
