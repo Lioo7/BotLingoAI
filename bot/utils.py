@@ -9,6 +9,7 @@ from pydub import AudioSegment
 
 from logs.logging import logger
 
+
 load_dotenv()
 
 # Check for required environment variables
