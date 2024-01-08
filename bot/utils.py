@@ -24,7 +24,7 @@ if (
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-REGION_NAME = "us-east-1"  # Change this to your desired AWS region
+REGION_NAME = "us-east-1"
 
 
 def transcribe_voice_message(file_id: str) -> str:
@@ -116,33 +116,6 @@ def convert_text_to_audio_aws(text: str, output_name: str) -> None:
         logger.error(
             "An error occurred while converting text to audio: %s", str(e)
         )
-
-
-def convert_audio_to_text(audio_file: str) -> str:
-    try:
-        # Initialize the recognizer
-        recognizer = sr.Recognizer()
-
-        # Load the audio file
-        with sr.AudioFile(audio_file) as source:
-            # Adjust for ambient noise and record audio
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.record(source)
-
-        # Recognize the speech in the audio
-        text = recognizer.recognize_google(audio, language="en")
-        return text
-    except sr.UnknownValueError:
-        logger.warning(
-            "Google Speech Recognition could not understand the audio."
-        )
-        return ""
-    except sr.RequestError as e:
-        logger.error(
-            "Could not request results from Google Speech Recognition service: %s",
-            str(e),
-        )
-        return ""
 
 
 def convert_mp3_to_wav(mp3_file: str, wav_file: str) -> None:
