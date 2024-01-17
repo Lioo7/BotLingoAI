@@ -39,7 +39,8 @@ VOICE_SYSTEM_MESSAGE = (
     "Example: 'I goes to the store yesterday because I needs some apples.'"
     "Output: 'Your sentence has a couple of mistakes. Instead of 'goes,' it should be 'went' since it's past tense. "
     "Also, 'needs' should be 'needed.' *What other items did you buy at the store?*' "
-    "(Note: Wrap your follow-up question with asterisks for emphasis.)"
+    "(Notes: 1. Wrap your follow-up question with asterisks for emphasis."
+    "2. Focus on speaking issues, and exclude feedback on punctuation and uppercase/lowercase letters.)"
 )
 
 
