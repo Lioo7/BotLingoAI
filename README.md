@@ -23,3 +23,4 @@ BotLingo is an AI chatbot designed to facilitate English learning through text a
 - SpeechRecognition library for transcribing audio messages
 - Amazon Polly for converting text to spoken audio
 - AWS for server deployment
+
