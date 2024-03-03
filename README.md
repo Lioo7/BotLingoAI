@@ -8,6 +8,10 @@
 [![requests](https://img.shields.io/badge/requests-2.31.0-purple)](https://pypi.org/project/requests/)
 [![SpeechRecognition](https://img.shields.io/badge/SpeechRecognition-3.10.1-red)](https://pypi.org/project/SpeechRecognition/)
 
+<p align="center">
+  <img src="https://i.ibb.co/LRTw27f/70cd689b-7165-4232-a139-84bb58182128.jpg" width="600" title="hover text">
+</p>
+
 BotLingo is an AI chatbot designed to facilitate English learning through text and voice interactions. It provides users with feedback and follow-up questions to improve their English skills. All interactions with the bot occur within the Telegram app.
 
 ## Features
